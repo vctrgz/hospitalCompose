@@ -1,0 +1,174 @@
+<html>
+<head>
+<title>MainActivity.kt</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<style type="text/css">
+.s0 { color: #cf8e6d;}
+.s1 { color: #bcbec4;}
+.s2 { color: #bcbec4;}
+.s3 { color: #6aab73;}
+.s4 { color: #2aacb8;}
+.s5 { color: #7a7e85;}
+</style>
+</head>
+<body bgcolor="#1e1f22">
+<table CELLSPACING=0 CELLPADDING=5 COLS=1 WIDTH="100%" BGCOLOR="#606060" >
+<tr><td><center>
+<font face="Arial, Helvetica" color="#000000">
+MainActivity.kt</font>
+</center></td></tr></table>
+<pre><span class="s0">package </span><span class="s1">com</span><span class="s2">.</span><span class="s1">example</span><span class="s2">.</span><span class="s1">hospitalv1</span>
+
+<span class="s1">import android</span><span class="s2">.</span><span class="s1">os</span><span class="s2">.</span><span class="s1">Bundle</span>
+<span class="s1">import androidx</span><span class="s2">.</span><span class="s1">activity</span><span class="s2">.</span><span class="s1">ComponentActivity</span>
+<span class="s1">import androidx</span><span class="s2">.</span><span class="s1">activity</span><span class="s2">.</span><span class="s1">compose</span><span class="s2">.</span><span class="s1">setContent</span>
+<span class="s1">import androidx</span><span class="s2">.</span><span class="s1">activity</span><span class="s2">.</span><span class="s1">enableEdgeToEdge</span>
+<span class="s1">import androidx</span><span class="s2">.</span><span class="s1">compose</span><span class="s2">.</span><span class="s1">foundation</span><span class="s2">.</span><span class="s1">layout</span><span class="s2">.</span><span class="s1">Column</span>
+<span class="s1">import androidx</span><span class="s2">.</span><span class="s1">compose</span><span class="s2">.</span><span class="s1">foundation</span><span class="s2">.</span><span class="s1">layout</span><span class="s2">.</span><span class="s1">Row</span>
+<span class="s1">import androidx</span><span class="s2">.</span><span class="s1">compose</span><span class="s2">.</span><span class="s1">foundation</span><span class="s2">.</span><span class="s1">layout</span><span class="s2">.</span><span class="s1">fillMaxSize</span>
+<span class="s1">import androidx</span><span class="s2">.</span><span class="s1">compose</span><span class="s2">.</span><span class="s1">foundation</span><span class="s2">.</span><span class="s1">layout</span><span class="s2">.</span><span class="s1">padding</span>
+<span class="s1">import androidx</span><span class="s2">.</span><span class="s1">compose</span><span class="s2">.</span><span class="s1">foundation</span><span class="s2">.</span><span class="s1">lazy</span><span class="s2">.</span><span class="s1">LazyColumn</span>
+<span class="s1">import androidx</span><span class="s2">.</span><span class="s1">compose</span><span class="s2">.</span><span class="s1">foundation</span><span class="s2">.</span><span class="s1">lazy</span><span class="s2">.</span><span class="s1">items</span>
+<span class="s1">import androidx</span><span class="s2">.</span><span class="s1">compose</span><span class="s2">.</span><span class="s1">material3</span><span class="s2">.</span><span class="s1">Button</span>
+<span class="s1">import androidx</span><span class="s2">.</span><span class="s1">compose</span><span class="s2">.</span><span class="s1">material3</span><span class="s2">.</span><span class="s1">Scaffold</span>
+<span class="s1">import androidx</span><span class="s2">.</span><span class="s1">compose</span><span class="s2">.</span><span class="s1">material3</span><span class="s2">.</span><span class="s1">Text</span>
+<span class="s1">import androidx</span><span class="s2">.</span><span class="s1">compose</span><span class="s2">.</span><span class="s1">runtime</span><span class="s2">.</span><span class="s1">Composable</span>
+<span class="s1">import androidx</span><span class="s2">.</span><span class="s1">compose</span><span class="s2">.</span><span class="s1">runtime</span><span class="s2">.*</span>
+<span class="s1">import androidx</span><span class="s2">.</span><span class="s1">compose</span><span class="s2">.</span><span class="s1">runtime</span><span class="s2">.</span><span class="s1">mutableStateOf</span>
+<span class="s1">import androidx</span><span class="s2">.</span><span class="s1">compose</span><span class="s2">.</span><span class="s1">runtime</span><span class="s2">.</span><span class="s1">remember</span>
+<span class="s1">import androidx</span><span class="s2">.</span><span class="s1">compose</span><span class="s2">.</span><span class="s1">runtime</span><span class="s2">.</span><span class="s1">getValue</span>
+<span class="s1">import androidx</span><span class="s2">.</span><span class="s1">compose</span><span class="s2">.</span><span class="s1">runtime</span><span class="s2">.</span><span class="s1">setValue</span>
+<span class="s1">import androidx</span><span class="s2">.</span><span class="s1">compose</span><span class="s2">.</span><span class="s1">ui</span><span class="s2">.</span><span class="s1">Modifier</span>
+<span class="s1">import androidx</span><span class="s2">.</span><span class="s1">compose</span><span class="s2">.</span><span class="s1">ui</span><span class="s2">.</span><span class="s1">tooling</span><span class="s2">.</span><span class="s1">preview</span><span class="s2">.</span><span class="s1">Preview</span>
+<span class="s1">import androidx</span><span class="s2">.</span><span class="s1">compose</span><span class="s2">.</span><span class="s1">ui</span><span class="s2">.</span><span class="s1">unit</span><span class="s2">.</span><span class="s1">dp</span>
+<span class="s1">import androidx</span><span class="s2">.</span><span class="s1">compose</span><span class="s2">.</span><span class="s1">ui</span><span class="s2">.</span><span class="s1">unit</span><span class="s2">.</span><span class="s1">sp</span>
+<span class="s1">import com</span><span class="s2">.</span><span class="s1">example</span><span class="s2">.</span><span class="s1">hospitalv1</span><span class="s2">.</span><span class="s1">ui</span><span class="s2">.</span><span class="s1">theme</span><span class="s2">.</span><span class="s1">HospitalV1Theme</span>
+
+<span class="s0">class </span><span class="s1">MainActivity : ComponentActivity</span><span class="s2">() {</span>
+
+    <span class="s1">override </span><span class="s0">fun </span><span class="s1">onCreate</span><span class="s2">(</span><span class="s1">savedInstanceState: Bundle?</span><span class="s2">) {</span>
+        <span class="s0">super</span><span class="s2">.</span><span class="s1">onCreate</span><span class="s2">(</span><span class="s1">savedInstanceState</span><span class="s2">)</span>
+        <span class="s1">enableEdgeToEdge</span><span class="s2">()</span>
+        <span class="s1">setContent </span><span class="s2">{</span>
+            <span class="s1">HospitalV1Theme </span><span class="s2">{</span>
+                <span class="s1">MyApp</span><span class="s2">()</span>
+            <span class="s2">}</span>
+        <span class="s2">}</span>
+    <span class="s2">}</span>
+<span class="s2">}</span>
+<span class="s1">@Composable</span>
+<span class="s0">fun </span><span class="s1">MyApp</span><span class="s2">(){</span>
+    <span class="s0">var </span><span class="s1">currentScreen by remember </span><span class="s2">{ </span><span class="s1">mutableStateOf</span><span class="s2">&lt;</span><span class="s1">Screen</span><span class="s2">&gt;(</span><span class="s1">Screen</span><span class="s2">.</span><span class="s1">Main</span><span class="s2">) }</span>
+    <span class="s0">when</span><span class="s2">(</span><span class="s1">currentScreen</span><span class="s2">){</span>
+        <span class="s1">Screen</span><span class="s2">.</span><span class="s1">Main </span><span class="s2">-&gt; </span><span class="s1">MainScreen</span><span class="s2">(</span>
+            <span class="s1">onShowNurses </span><span class="s2">= {</span><span class="s1">currentScreen </span><span class="s2">= </span><span class="s1">Screen</span><span class="s2">.</span><span class="s1">Nurses</span><span class="s2">},</span>
+            <span class="s1">onShowWelcome </span><span class="s2">= {</span><span class="s1">currentScreen </span><span class="s2">= </span><span class="s1">Screen</span><span class="s2">.</span><span class="s1">Welcome</span><span class="s2">}</span>
+        <span class="s2">)</span>
+        <span class="s1">Screen</span><span class="s2">.</span><span class="s1">Nurses </span><span class="s2">-&gt; </span><span class="s1">NurseScreen</span><span class="s2">(</span><span class="s1">onBack </span><span class="s2">= { </span><span class="s1">currentScreen </span><span class="s2">= </span><span class="s1">Screen</span><span class="s2">.</span><span class="s1">Main</span><span class="s2">})</span>
+        <span class="s1">Screen</span><span class="s2">.</span><span class="s1">Welcome </span><span class="s2">-&gt; </span><span class="s1">WelcomeScreen</span><span class="s2">(</span><span class="s1">onBack </span><span class="s2">= { </span><span class="s1">currentScreen </span><span class="s2">= </span><span class="s1">Screen</span><span class="s2">.</span><span class="s1">Main</span><span class="s2">})</span>
+    <span class="s2">}</span>
+<span class="s2">}</span>
+<span class="s1">sealed </span><span class="s0">class </span><span class="s1">Screen </span><span class="s2">{</span>
+    <span class="s0">object </span><span class="s1">Main : Screen</span><span class="s2">()</span>
+    <span class="s0">object </span><span class="s1">Nurses : Screen</span><span class="s2">()</span>
+    <span class="s0">object </span><span class="s1">Welcome : Screen</span><span class="s2">()</span>
+<span class="s2">}</span>
+
+<span class="s1">@Composable</span>
+<span class="s0">fun </span><span class="s1">ElementColumna</span><span class="s2">(</span><span class="s1">text:String</span><span class="s2">){</span>
+    <span class="s1">Text</span><span class="s2">(</span>
+        <span class="s1">text </span><span class="s2">= </span><span class="s3">&quot; -</span><span class="s0">$</span><span class="s1">text</span><span class="s3">&quot;</span><span class="s2">,</span>
+        <span class="s1">fontSize</span><span class="s2">= </span><span class="s4">20</span><span class="s2">.</span><span class="s1">sp</span><span class="s2">,</span>
+        <span class="s1">modifier</span><span class="s2">= </span><span class="s1">Modifier</span><span class="s2">.</span><span class="s1">padding</span><span class="s2">(</span><span class="s1">bottom </span><span class="s2">= </span><span class="s4">20</span><span class="s2">.</span><span class="s1">dp</span><span class="s2">))</span>
+<span class="s2">}</span>
+<span class="s1">@Composable</span>
+<span class="s0">fun </span><span class="s1">MainScreen</span><span class="s2">(</span><span class="s1">onShowNurses: </span><span class="s2">() -&gt; </span><span class="s1">Unit</span><span class="s2">, </span><span class="s1">onShowWelcome: </span><span class="s2">() -&gt; </span><span class="s1">Unit</span><span class="s2">){</span>
+    <span class="s1">Column </span><span class="s2">{</span>
+        <span class="s1">Row </span><span class="s2">{</span>
+            <span class="s1">Button</span><span class="s2">(</span><span class="s1">onClick </span><span class="s2">= </span><span class="s1">onShowNurses</span><span class="s2">) {</span>
+                <span class="s1">Text</span><span class="s2">(</span>
+                    <span class="s1">text </span><span class="s2">= </span><span class="s3">&quot;Nurses information&quot;</span>
+                <span class="s2">)</span>
+            <span class="s2">}</span>
+            <span class="s1">Button</span><span class="s2">(</span><span class="s1">onClick </span><span class="s2">= </span><span class="s1">onShowWelcome</span><span class="s2">) {</span>
+                <span class="s1">Text</span><span class="s2">(</span>
+                    <span class="s1">text </span><span class="s2">= </span><span class="s3">&quot;Welcome message&quot;</span>
+                <span class="s2">)</span>
+            <span class="s2">}</span>
+        <span class="s2">}</span>
+    <span class="s2">}</span>
+<span class="s2">}</span>
+
+<span class="s1">@Composable</span>
+<span class="s0">fun </span><span class="s1">NurseScreen</span><span class="s2">(</span><span class="s1">onBack: </span><span class="s2">() -&gt; </span><span class="s1">Unit</span><span class="s2">){</span>
+    <span class="s1">Column </span><span class="s2">{</span>
+        <span class="s1">Button</span><span class="s2">(</span><span class="s1">onClick </span><span class="s2">= </span><span class="s1">onBack</span><span class="s2">) {</span>
+            <span class="s1">Text</span><span class="s2">(</span><span class="s1">text </span><span class="s2">= </span><span class="s3">&quot;Back&quot;</span><span class="s2">)</span>
+        <span class="s2">}</span>
+        <span class="s0">var </span><span class="s1">showAllNurses by remember </span><span class="s2">{ </span><span class="s1">mutableStateOf</span><span class="s2">(</span><span class="s0">false</span><span class="s2">) }</span>
+        <span class="s1">Button</span><span class="s2">(</span>
+            <span class="s1">onClick </span><span class="s2">= {</span>
+                <span class="s0">if </span><span class="s2">(</span><span class="s1">showAllNurses</span><span class="s2">){</span>
+                <span class="s1">showAllNurses </span><span class="s2">= </span><span class="s0">false</span>
+                <span class="s2">}</span><span class="s0">else</span><span class="s2">{</span>
+                    <span class="s1">showAllNurses </span><span class="s2">= </span><span class="s0">true</span>
+                <span class="s2">}</span>
+            <span class="s2">}</span>
+        <span class="s2">) {</span>
+            <span class="s1">Text</span><span class="s2">(</span>
+                <span class="s1">text </span><span class="s2">= </span><span class="s3">&quot;Show all nurses&quot;</span>
+            <span class="s2">)</span>
+        <span class="s2">}</span>
+        <span class="s0">if </span><span class="s2">(</span><span class="s1">showAllNurses</span><span class="s2">){</span>
+            <span class="s1">ShowAllNursesInformation</span><span class="s2">()</span>
+        <span class="s2">}</span>
+    <span class="s2">}</span>
+<span class="s2">}</span>
+
+<span class="s1">@Composable</span>
+<span class="s0">fun </span><span class="s1">WelcomeScreen</span><span class="s2">(</span><span class="s1">onBack: </span><span class="s2">() -&gt; </span><span class="s1">Unit</span><span class="s2">){</span>
+    <span class="s1">Column </span><span class="s2">{</span>
+        <span class="s1">Button</span><span class="s2">(</span><span class="s1">onClick </span><span class="s2">= </span><span class="s1">onBack</span><span class="s2">) {</span>
+            <span class="s1">Text</span><span class="s2">(</span>
+                <span class="s1">text </span><span class="s2">= </span><span class="s3">&quot;Back&quot;</span>
+            <span class="s2">)</span>
+        <span class="s2">}</span>
+        <span class="s1">Text</span><span class="s2">(</span>
+            <span class="s1">text </span><span class="s2">= </span><span class="s3">&quot;Bienvenido&quot;</span>
+        <span class="s2">)</span>
+    <span class="s2">}</span>
+<span class="s2">}</span>
+<span class="s0">var </span><span class="s1">nurses </span><span class="s2">= </span><span class="s1">listOf</span><span class="s2">(</span><span class="s3">&quot;Juan&quot;</span><span class="s2">, </span><span class="s3">&quot;Carlos&quot;</span><span class="s2">, </span><span class="s3">&quot;Miguel&quot;</span><span class="s2">, </span><span class="s3">&quot;Javier&quot;</span><span class="s2">, </span><span class="s3">&quot;Marcos&quot;</span><span class="s2">)</span>
+<span class="s1">@Composable</span>
+<span class="s0">fun </span><span class="s1">ShowAllNursesInformation</span><span class="s2">(){</span>
+    <span class="s1">Column </span><span class="s2">{</span>
+        <span class="s1">Text</span><span class="s2">(</span>
+            <span class="s1">text </span><span class="s2">= </span><span class="s3">&quot;ALL NURSES INFORMATION:&quot;</span><span class="s2">,</span>
+            <span class="s1">modifier </span><span class="s2">= </span><span class="s1">Modifier</span><span class="s2">.</span><span class="s1">padding</span><span class="s2">(</span><span class="s4">20</span><span class="s2">.</span><span class="s1">dp</span><span class="s2">)</span>
+        <span class="s2">)</span>
+
+        <span class="s1">LazyColumn</span><span class="s2">(</span><span class="s1">modifier</span><span class="s2">= </span><span class="s1">Modifier</span><span class="s2">) {</span>
+            <span class="s1">items</span><span class="s2">(</span><span class="s1">items</span><span class="s2">= </span><span class="s1">nurses</span><span class="s2">){</span>
+                    <span class="s1">nurse</span><span class="s2">-&gt;</span><span class="s1">ElementColumna</span><span class="s2">(</span><span class="s1">nurse</span><span class="s2">)</span>
+            <span class="s2">}</span>
+        <span class="s2">}</span>
+    <span class="s2">}</span>
+<span class="s2">}</span>
+
+
+<span class="s5">//@Preview(showBackground = true)</span>
+<span class="s5">//@Composable</span>
+<span class="s5">//fun ShowAllNursesInformationPreview() {</span>
+<span class="s5">//    HospitalV1Theme {</span>
+<span class="s5">//        showAllNursesInformation()</span>
+<span class="s5">//    }</span>
+<span class="s5">//}</span>
+<span class="s1">@Preview</span><span class="s2">(</span><span class="s1">showBackground </span><span class="s2">= </span><span class="s0">true</span><span class="s2">)</span>
+<span class="s1">@Composable</span>
+<span class="s0">fun </span><span class="s1">MyAppPreview</span><span class="s2">() {</span>
+    <span class="s1">HospitalV1Theme </span><span class="s2">{</span>
+        <span class="s1">MyApp</span><span class="s2">()</span>
+    <span class="s2">}</span>
+<span class="s2">}</span></pre>
+</body>
+</html>
