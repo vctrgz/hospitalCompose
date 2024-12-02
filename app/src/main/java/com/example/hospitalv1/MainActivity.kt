@@ -157,7 +157,7 @@ fun LoginScreen(onBack: () -> Unit) {
         Button(onClick = {
             val nurse = nurses.find { it.name.equals(username, ignoreCase = true) && it.password == password }
             if (nurse != null) {
-                loginError = ""
+                loginError = "Login successful"
                 // Implement successful login action (e.g., navigate to another screen)
             } else {
                 loginError = "Invalid credentials. Please try again."
@@ -165,14 +165,12 @@ fun LoginScreen(onBack: () -> Unit) {
         }) {
             Text(text = "Login")
         }
+        Text(
+            text = loginError,
+            color = MaterialTheme.colorScheme.error,
+            modifier = Modifier.padding(16.dp)
+        )
 
-        if (loginError.isNotEmpty()) {
-            Text(
-                text = loginError,
-                color = MaterialTheme.colorScheme.error,
-                modifier = Modifier.padding(16.dp)
-            )
-        }
     }
 }
 
