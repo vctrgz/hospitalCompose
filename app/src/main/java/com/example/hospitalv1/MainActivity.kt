@@ -6,27 +6,25 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Button
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
+import androidx.compose.material3.TextField
 import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.hospitalv1.ui.theme.HospitalV1Theme
+import kotlin.text.contains
 
 class MainActivity : ComponentActivity() {
 
@@ -60,9 +58,18 @@ sealed class Screen {
     object Login : Screen()
     object Search : Screen()
 }
+data class Nurse(val id: Int, val name: String, val password: String)
+val nurses = listOf(
+    Nurse(1, "Juan", "password123"),
+    Nurse(2, "Carlos", "securePass456"),
+    Nurse(3, "Miguel", "qwerty789"),
+    Nurse(4, "Javier", "abc123"),
+    Nurse(5, "Carlos", "wyz789"),
+    Nurse(6, "Marcos", "pass1234")
+)
 
 @Composable
-fun ElementColumna(text:String){
+fun ElementColumn(text:String){
     Text(
         text = " -$text",
         fontSize= 20.sp,
@@ -134,20 +141,46 @@ fun LoginScreen(onBack: () -> Unit){
 
 @Composable
 fun SearchScreen(onBack: () -> Unit){
+    var searchNurse by remember { mutableStateOf("") }
+    var showResults by remember { mutableStateOf(emptyList<Nurse>()) }
     Column {
         Button(onClick = onBack) {
             Text(
                 text = "Back"
             )
         }
-        //Codigo de Search nurse
-        Text(
-            text = "Bienvenido"
+        TextField(
+            value = searchNurse,
+            onValueChange = { searchNurse = it },
+            label = { Text(text = "Search Nurse by Name") },
+            modifier = Modifier.fillMaxWidth().padding(bottom = 16.dp)
         )
+        Button(onClick = {
+            //showResults = nurses.filter { it.name.contains(searchNurse, ignoreCase = true) }
+            showResults = nurses.filter { it.name.equals(searchNurse) }
+        }) {
+            Text(text = "Search")
+        }
+        if (showResults.isNotEmpty()) {
+            Text(
+                text = "Search Results:",
+                modifier = Modifier.padding(vertical = 16.dp),
+                fontSize = 18.sp
+            )
+            LazyColumn(modifier= Modifier) {
+                items(items= showResults){
+                        nurse->ElementColumn(nurse.toString())
+                }
+            }
+        } else if (searchNurse.isNotEmpty()) {
+            Text(
+                text = "No nurses found with the name \"$searchNurse\".",
+            )
+        }
     }
 }
 
-var nurses = listOf("Juan", "Carlos", "Miguel", "Javier", "Marcos")
+
 @Composable
 fun ShowAllNursesInformation(){
     Column {
@@ -158,7 +191,7 @@ fun ShowAllNursesInformation(){
 
         LazyColumn(modifier= Modifier) {
             items(items= nurses){
-                    nurse->ElementColumna(nurse)
+                    nurse->ElementColumn(nurse.toString())
             }
         }
     }
