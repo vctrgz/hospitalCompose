@@ -7,7 +7,10 @@ import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Button
@@ -43,16 +46,19 @@ fun MyApp(){
     when(currentScreen){
         Screen.Main -> MainScreen(
             onShowNurses = {currentScreen = Screen.Nurses},
-            onShowWelcome = {currentScreen = Screen.Welcome}
+            onShowLogin = {currentScreen = Screen.Login},
+            onShowSearch = {currentScreen = Screen.Search},
         )
         Screen.Nurses -> NurseScreen(onBack = { currentScreen = Screen.Main})
-        Screen.Welcome -> WelcomeScreen(onBack = { currentScreen = Screen.Main})
+        Screen.Login -> LoginScreen(onBack = { currentScreen = Screen.Main})
+        Screen.Search -> SearchScreen(onBack = { currentScreen = Screen.Main})
     }
 }
 sealed class Screen {
     object Main : Screen()
     object Nurses : Screen()
-    object Welcome : Screen()
+    object Login : Screen()
+    object Search : Screen()
 }
 
 @Composable
@@ -63,7 +69,7 @@ fun ElementColumna(text:String){
         modifier= Modifier.padding(bottom = 20.dp))
 }
 @Composable
-fun MainScreen(onShowNurses: () -> Unit, onShowWelcome: () -> Unit){
+fun MainScreen(onShowNurses: () -> Unit, onShowLogin: () -> Unit, onShowSearch: () -> Unit){
     Column {
         Row {
             Button(onClick = onShowNurses) {
@@ -71,9 +77,14 @@ fun MainScreen(onShowNurses: () -> Unit, onShowWelcome: () -> Unit){
                     text = "Nurses information"
                 )
             }
-            Button(onClick = onShowWelcome) {
+            Button(onClick = onShowLogin) {
                 Text(
-                    text = "Welcome message"
+                    text = "Login"
+                )
+            }
+            Button(onClick = onShowSearch) {
+                Text(
+                    text = "Search nurse"
                 )
             }
         }
@@ -107,18 +118,35 @@ fun NurseScreen(onBack: () -> Unit){
 }
 
 @Composable
-fun WelcomeScreen(onBack: () -> Unit){
+fun LoginScreen(onBack: () -> Unit){
     Column {
         Button(onClick = onBack) {
             Text(
                 text = "Back"
             )
         }
+        //Codigo de login validate
         Text(
             text = "Bienvenido"
         )
     }
 }
+
+@Composable
+fun SearchScreen(onBack: () -> Unit){
+    Column {
+        Button(onClick = onBack) {
+            Text(
+                text = "Back"
+            )
+        }
+        //Codigo de Search nurse
+        Text(
+            text = "Bienvenido"
+        )
+    }
+}
+
 var nurses = listOf("Juan", "Carlos", "Miguel", "Javier", "Marcos")
 @Composable
 fun ShowAllNursesInformation(){
