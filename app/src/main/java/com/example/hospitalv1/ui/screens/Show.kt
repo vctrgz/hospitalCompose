@@ -13,13 +13,14 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import com.example.hospitalv1.AppViewModel
 import com.example.hospitalv1.ElementColumn
 import com.example.hospitalv1.nurses
 
 @Composable
-fun NurseScreen(onBack: () -> Unit){
+fun NurseScreen(viewModel: AppViewModel){
     Column {
-        Button(onClick = onBack) {
+        Button(onClick = {viewModel.updateScreen("Main")}) {
             Text(text = "Back")
         }
         var showAllNurses by remember { mutableStateOf(false) }

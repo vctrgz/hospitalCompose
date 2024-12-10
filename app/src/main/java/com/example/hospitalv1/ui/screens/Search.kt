@@ -16,16 +16,17 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.hospitalv1.AppViewModel
 import com.example.hospitalv1.ElementColumn
 import com.example.hospitalv1.Nurse
 import com.example.hospitalv1.nurses
 
 @Composable
-fun SearchScreen(onBack: () -> Unit){
+fun SearchScreen(viewModel: AppViewModel){
     var searchNurse by remember { mutableStateOf("") }
     var showResults by remember { mutableStateOf(emptyList<Nurse>()) }
     Column {
-        Button(onClick = onBack) {
+        Button(onClick = {viewModel.updateScreen("Main")}) {
             Text(
                 text = "Back"
             )

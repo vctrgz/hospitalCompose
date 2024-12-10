@@ -16,16 +16,17 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.hospitalv1.AppViewModel
 import com.example.hospitalv1.nurses
 
 @Composable
-fun LoginScreen(onBack: () -> Unit) {
+fun LoginScreen(viewModel: AppViewModel) {
     var username by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var loginError by remember { mutableStateOf("") }
 
     Column {
-        Button(onClick = onBack) {
+        Button(onClick = {viewModel.updateScreen("Main")}) {
             Text(text = "Back")
         }
 

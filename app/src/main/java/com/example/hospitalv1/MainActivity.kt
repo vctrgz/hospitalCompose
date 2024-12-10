@@ -6,33 +6,45 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Button
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextField
 import androidx.compose.runtime.*
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.hospitalv1.ui.theme.HospitalV1Theme
 import com.example.hospitalv1.ui.screens.SearchScreen
 import com.example.hospitalv1.ui.screens.NurseScreen
 import com.example.hospitalv1.ui.screens.LoginScreen
-import kotlin.text.contains
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
+
+data class Screen (
+    val screen : String = "",
+    val logged: Boolean = false
+){}
+class AppViewModel:ViewModel(){
+    private val _currentScreen = MutableStateFlow(Screen())
+    val currentScreen: StateFlow<Screen> get()=_currentScreen.asStateFlow()
+    init {
+        _currentScreen.value= Screen("Main",false)
+    }
+    fun updateScreen(newScreen:String){
+        _currentScreen.update { it.copy(screen = newScreen) }
+    }
+    fun getScreen():String{
+        return _currentScreen.value.screen
+    }
+}
 
 class MainActivity : ComponentActivity() {
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
@@ -44,12 +56,7 @@ class MainActivity : ComponentActivity() {
     }
 }
 
-sealed class Screen {
-    object Main : Screen()
-    object Nurses : Screen()
-    object Login : Screen()
-    object Search : Screen()
-}
+
 
 data class Nurse(val id: Int, val name: String, val password: String)
 
@@ -64,34 +71,38 @@ val nurses = listOf(
 
 @Composable
 fun MyApp(){
-    var currentScreen by remember { mutableStateOf<Screen>(Screen.Main) }
-    when(currentScreen){
-        Screen.Main -> MainScreen(
-            onShowNurses = {currentScreen = Screen.Nurses},
-            onShowLogin = {currentScreen = Screen.Login},
-            onShowSearch = {currentScreen = Screen.Search},
+  //  var currentScreen by remember { mutableStateOf<String>("Main") }
+    val viewModel:AppViewModel= viewModel()
+    when(viewModel.currentScreen.collectAsState().value.screen){
+  //  when(currentScreen){
+        "Main" -> MainScreen(viewModel
+//            onShowNurses = {currentScreen = "Nurses"},
+//            onShowLogin = {currentScreen = "Login"},
+//            onShowSearch = {currentScreen = "Search"},
         )
-        Screen.Nurses -> NurseScreen(onBack = { currentScreen = Screen.Main})
-        Screen.Login -> LoginScreen(onBack = { currentScreen = Screen.Main})
-        Screen.Search -> SearchScreen(onBack = { currentScreen = Screen.Main})
+        "Nurses" -> NurseScreen(viewModel)
+        "Login" -> LoginScreen(viewModel)
+        "Search" -> SearchScreen(viewModel)
     }
 }
-
+//            onShowNurses = {currentScreen = "Nurses"},
+//            onShowLogin = {currentScreen = "Login"},
+//            onShowSearch = {currentScreen = "Search"},
 @Composable
-fun MainScreen(onShowNurses: () -> Unit, onShowLogin: () -> Unit, onShowSearch: () -> Unit){
+fun MainScreen(viewModel: AppViewModel) {
     Column {
         Row {
-            Button(onClick = onShowNurses) {
+            Button(onClick = {viewModel.updateScreen("Nurses")}) {
                 Text(
                     text = "Nurses information"
                 )
             }
-            Button(onClick = onShowLogin) {
+            Button(onClick = {viewModel.updateScreen("Login")}) {
                 Text(
                     text = "Login"
                 )
             }
-            Button(onClick = onShowSearch) {
+            Button(onClick = {viewModel.updateScreen("Search")}) {
                 Text(
                     text = "Search nurse"
                 )
