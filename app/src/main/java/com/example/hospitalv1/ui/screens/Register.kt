@@ -79,7 +79,7 @@ fun RegisterScreen(viewModel: AppViewModel) {
                     if (nurses.any { it.name == username }) {
                         registrationError = "Username already exists. Please try another."
                     } else {
-                        val newNurse = Nurse(id = nurses.size + 1, name = username, password = password)
+                        val newNurse = Nurse(id = nurses.size + 1, name = username, password = password, profilePictureUrl = "https://static.nationalgeographicla.com/files/styles/image_3200/public/3897187267_f36b5e4e7a_c.webp?w=1600&h=1200")
                         nurses.add(newNurse)
                         viewModel.updateScreen("Login")
                     }

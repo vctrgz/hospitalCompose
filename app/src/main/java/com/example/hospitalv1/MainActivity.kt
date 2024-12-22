@@ -76,16 +76,16 @@ class MainActivity : ComponentActivity() {
     }
 }
 
-data class Nurse(val id: Int, val name: String, val password: String)
+data class Nurse(val id: Int, val name: String, val password: String, val profilePictureUrl: String)
 
 // modificar usuario de list a mutable para modificarlo
 val nurses = mutableListOf(
-    Nurse(1, "Juan", "password123"),
-    Nurse(2, "Carlos", "securePass456"),
-    Nurse(3, "Miguel", "qwerty789"),
-    Nurse(4, "Javier", "abc123"),
-    Nurse(5, "Carlos", "wyz789"),
-    Nurse(6, "Marcos", "pass1234")
+    Nurse(1, "Juan", "password123", "https://static.nationalgeographicla.com/files/styles/image_3200/public/3897187267_f36b5e4e7a_c.webp?w=1600&h=1200"),
+    Nurse(2, "Carlos", "securePass456", "https://static.nationalgeographicla.com/files/styles/image_3200/public/3897187267_f36b5e4e7a_c.webp?w=1600&h=1200"),
+    Nurse(3, "Miguel", "qwerty789", "https://static.nationalgeographicla.com/files/styles/image_3200/public/3897187267_f36b5e4e7a_c.webp?w=1600&h=1200"),
+    Nurse(4, "Javier", "abc123", "https://static.nationalgeographicla.com/files/styles/image_3200/public/3897187267_f36b5e4e7a_c.webp?w=1600&h=1200"),
+    Nurse(5, "Carlos", "wyz789", "https://static.nationalgeographicla.com/files/styles/image_3200/public/3897187267_f36b5e4e7a_c.webp?w=1600&h=1200"),
+    Nurse(6, "Marcos", "pass1234", "https://static.nationalgeographicla.com/files/styles/image_3200/public/3897187267_f36b5e4e7a_c.webp?w=1600&h=1200")
 )
 
 @Composable
@@ -168,6 +168,6 @@ fun ElementColumn(text:String){
 @Composable
 fun MyAppPreview() {
     HospitalV1Theme {
-        MyApp()
+        MyApp() // Mostrar pantalla principal en la vista previa
     }
 }
