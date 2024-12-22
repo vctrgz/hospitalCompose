@@ -4,45 +4,65 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.runtime.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewmodel.compose.viewModel
-import com.example.hospitalv1.ui.theme.HospitalV1Theme
+import androidx.lifecycle.ViewModelProvider
 import com.example.hospitalv1.ui.screens.SearchScreen
 import com.example.hospitalv1.ui.screens.NurseScreen
 import com.example.hospitalv1.ui.screens.LoginScreen
-import kotlinx.coroutines.flow.StateFlow
+import com.example.hospitalv1.ui.screens.RegisterScreen
+import com.example.hospitalv1.ui.theme.HospitalV1Theme
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 
-data class Screen (
-    val screen : String = "",
-    val logged: Boolean = false
-){}
-class AppViewModel:ViewModel(){
+data class Screen(val screen: String = "", val logged: Boolean = false)
+
+class AppViewModel : ViewModel() {
     private val _currentScreen = MutableStateFlow(Screen())
-    val currentScreen: StateFlow<Screen> get()=_currentScreen.asStateFlow()
+    val currentScreen: StateFlow<Screen> get() = _currentScreen.asStateFlow()
+
+    // formatear pantalla de login a no login
     init {
-        _currentScreen.value= Screen("Main",false)
+        _currentScreen.value = Screen("Login", false)
     }
-    fun updateScreen(newScreen:String){
+
+    // despues de login actualizar estado
+    fun loginSuccess() {
+        _currentScreen.update { it.copy(screen = "Main", logged = true) }
+    }
+
+    // actualizar pantalla
+    fun updateScreen(newScreen: String) {
         _currentScreen.update { it.copy(screen = newScreen) }
     }
-    fun getScreen():String{
-        return _currentScreen.value.screen
+
+    // verificar si el usuario se ha registado
+    fun isLogged(): Boolean {
+        return _currentScreen.value.logged
     }
 }
+
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -56,11 +76,10 @@ class MainActivity : ComponentActivity() {
     }
 }
 
-
-
 data class Nurse(val id: Int, val name: String, val password: String)
 
-val nurses = listOf(
+// modificar usuario de list a mutable para modificarlo
+val nurses = mutableListOf(
     Nurse(1, "Juan", "password123"),
     Nurse(2, "Carlos", "securePass456"),
     Nurse(3, "Miguel", "qwerty789"),
@@ -70,46 +89,72 @@ val nurses = listOf(
 )
 
 @Composable
-fun MyApp(){
-  //  var currentScreen by remember { mutableStateOf<String>("Main") }
-    val viewModel:AppViewModel= viewModel()
-    when(viewModel.currentScreen.collectAsState().value.screen){
-  //  when(currentScreen){
-        "Main" -> MainScreen(viewModel
-//            onShowNurses = {currentScreen = "Nurses"},
-//            onShowLogin = {currentScreen = "Login"},
-//            onShowSearch = {currentScreen = "Search"},
-        )
-        "Nurses" -> NurseScreen(viewModel)
-        "Login" -> LoginScreen(viewModel)
-        "Search" -> SearchScreen(viewModel)
-    }
-}
-//            onShowNurses = {currentScreen = "Nurses"},
-//            onShowLogin = {currentScreen = "Login"},
-//            onShowSearch = {currentScreen = "Search"},
-@Composable
-fun MainScreen(viewModel: AppViewModel) {
-    Column {
-        Row {
-            Button(onClick = {viewModel.updateScreen("Nurses")}) {
-                Text(
-                    text = "Nurses information"
-                )
-            }
-            Button(onClick = {viewModel.updateScreen("Login")}) {
-                Text(
-                    text = "Login"
-                )
-            }
-            Button(onClick = {viewModel.updateScreen("Search")}) {
-                Text(
-                    text = "Search nurse"
-                )
-            }
+fun MyApp() {
+    val viewModel: AppViewModel = ViewModelProvider(
+        LocalContext.current as ComponentActivity
+    ).get(AppViewModel::class.java)
+
+    val currentScreen = viewModel.currentScreen.collectAsState().value
+
+    if (!currentScreen.logged) {
+        when (currentScreen.screen) {
+            "Register" -> RegisterScreen(viewModel)
+            else -> LoginScreen(viewModel)
+        }
+    } else {
+        when (currentScreen.screen) {
+            "Main" -> MainScreen(viewModel)
+            "Nurses" -> NurseScreen(viewModel)
+            "Search" -> SearchScreen(viewModel)
         }
     }
 }
+
+
+
+@Composable
+fun MainScreen(viewModel: AppViewModel) {
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(16.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
+    ) {
+        Text(
+            text = "Welcome to the Hospital System",
+            style = MaterialTheme.typography.headlineMedium,
+            color = MaterialTheme.colorScheme.primary,
+            modifier = Modifier.padding(bottom = 32.dp)
+        )
+
+        Button(
+            onClick = { viewModel.updateScreen("Nurses") },
+            modifier = Modifier
+                .fillMaxWidth(0.8f)
+                .padding(bottom = 16.dp)
+                .height(56.dp),
+            colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary),
+            shape = RoundedCornerShape(12.dp)
+        ) {
+            Text(text = "View Nurses Information", fontSize = 18.sp, color = Color.White)
+        }
+
+        Button(
+            onClick = { viewModel.updateScreen("Search") },
+            modifier = Modifier
+                .fillMaxWidth(0.8f)
+                .height(56.dp),
+            colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary),
+            shape = RoundedCornerShape(12.dp)
+        ) {
+            Text(text = "Search Nurse", fontSize = 18.sp, color = Color.White)
+        }
+    }
+}
+
+
+
 
 @Composable
 fun ElementColumn(text:String){
