@@ -2,13 +2,16 @@ package com.example.hospitalv1.ui.screens
 
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
+import coil.compose.AsyncImage
 import com.example.hospitalv1.AppViewModel
 import com.example.hospitalv1.nurses
 
@@ -41,7 +44,7 @@ fun SearchScreen(viewModel: AppViewModel) {
             modifier = Modifier.padding(bottom = 24.dp)
         )
 
-        // 搜索输入框
+        // Text field
         TextField(
             value = searchNurse,
             onValueChange = { searchNurse = it },
@@ -57,15 +60,35 @@ fun SearchScreen(viewModel: AppViewModel) {
             )
         )
 
-        // 搜索结果
+        // Query result
         if (filteredResults.isNotEmpty()) {
             filteredResults.forEach { nurse ->
-                Text(
-                    text = "ID: ${nurse.id}, Name: ${nurse.name}",
-                    style = MaterialTheme.typography.bodyLarge,
-                    color = Color.Black,
-                    modifier = Modifier.padding(bottom = 8.dp)
-                )
+                Row (
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(start = 100.dp, top = 8.dp, bottom = 8.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    //horizontalArrangement = Arrangement.Start
+                ) {
+                    // Imagen de perfil
+                    AsyncImage(
+                        model = nurse.profilePictureUrl
+                            ?: "https://www.example.com/default-image.png",
+                        contentDescription = "Profile Picture of ${nurse.name}",
+                        modifier = Modifier
+                            .size(50.dp)
+                            .padding(end = 16.dp),
+                        contentScale = ContentScale.Crop, // Recorta la imagen de forma cuadrada
+                        onError = {},
+                        onLoading = {}
+                    )
+                    Text(
+                        text = "ID: ${nurse.id}, Name: ${nurse.name}",
+                        style = MaterialTheme.typography.bodyLarge,
+                        color = Color.Black,
+                        modifier = Modifier.padding(bottom = 8.dp)
+                    )
+                }
             }
         } else if (searchNurse.isNotEmpty()) {
             Text(
@@ -76,7 +99,7 @@ fun SearchScreen(viewModel: AppViewModel) {
             )
         }
 
-        // 返回按钮
+        // Back button
         Button(
             onClick = { viewModel.updateScreen("Main") },
             modifier = Modifier.padding(top = 24.dp)
