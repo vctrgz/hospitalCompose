@@ -168,6 +168,6 @@ fun ElementColumn(text:String){
 @Composable
 fun MyAppPreview() {
     HospitalV1Theme {
-        MyApp()
+        MyApp() // Mostrar pantalla principal en la vista previa
     }
 }
