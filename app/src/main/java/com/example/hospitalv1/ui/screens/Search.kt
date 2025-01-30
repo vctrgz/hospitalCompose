@@ -66,7 +66,7 @@ fun SearchScreen(viewModel: AppViewModel) {
                 Row (
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(start = 100.dp, top = 8.dp, bottom = 8.dp),
+                        .padding(start = 80.dp, top = 8.dp, bottom = 8.dp),
                     verticalAlignment = Alignment.CenterVertically,
                     //horizontalArrangement = Arrangement.Start
                 ) {
