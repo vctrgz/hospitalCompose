@@ -1,6 +1,7 @@
 package com.example.hospitalv1
 
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -17,6 +18,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -26,6 +28,10 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.viewModelScope
+import com.example.hospitalv1.ui.remote.Nurse
+import com.example.hospitalv1.ui.remote.RemoteLoginInterface
+import com.example.hospitalv1.ui.remote.RemoteNurseUiState
 import com.example.hospitalv1.ui.screens.SearchScreen
 import com.example.hospitalv1.ui.screens.NurseScreen
 import com.example.hospitalv1.ui.screens.LoginScreen
@@ -35,10 +41,19 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
+import retrofit2.Retrofit
+import retrofit2.converter.gson.GsonConverterFactory
+import retrofit2.create
+import retrofit2.http.GET
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
 
 data class Screen(val screen: String = "", val logged: Boolean = false)
 
 class AppViewModel : ViewModel() {
+    var remoteNurseUiState: RemoteNurseUiState by mutableStateOf(RemoteNurseUiState.Cargant)
+    private set
     private val _currentScreen = MutableStateFlow(Screen())
     val currentScreen: StateFlow<Screen> get() = _currentScreen.asStateFlow()
 
@@ -50,6 +65,25 @@ class AppViewModel : ViewModel() {
     // despues de login actualizar estado
     fun loginSuccess() {
         _currentScreen.update { it.copy(screen = "Main", logged = true) }
+    }
+    fun postRemoteLogin(name: String, password: String) {
+        viewModelScope.launch{
+            remoteNurseUiState=RemoteNurseUiState.Cargant
+            try {
+                val connection = Retrofit.Builder()
+                    .baseUrl("http://10.0.2.2:8080")
+                    .addConverterFactory(GsonConverterFactory.create())
+                    .build()
+                val endPoint= connection.create(RemoteLoginInterface::class.java)
+                val answer = endPoint.postRemoteLogin(Nurse( name = name, password = password))
+                //val answer = endPoint.getRemoteFindById()
+                Log.d("Login", "RESPUESTA ${answer}")
+                remoteNurseUiState= RemoteNurseUiState.Success(answer)
+            }catch (e: Exception){
+                Log.d("Login", "RESPUESTA ERROR ${e.message}${e.printStackTrace()}")
+                remoteNurseUiState = RemoteNurseUiState.Error
+            }
+        }
     }
 
     // actualizar pantalla
@@ -64,6 +98,8 @@ class AppViewModel : ViewModel() {
 }
 
 
+
+
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -76,7 +112,6 @@ class MainActivity : ComponentActivity() {
     }
 }
 
-data class Nurse(val id: Int, val name: String, val password: String, val profilePictureUrl: String)
 
 // modificar usuario de list a mutable para modificarlo
 val nurses = mutableListOf(

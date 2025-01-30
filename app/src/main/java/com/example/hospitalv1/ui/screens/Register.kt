@@ -10,11 +10,12 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.hospitalv1.AppViewModel
-import com.example.hospitalv1.Nurse
+//import com.example.hospitalv1.Nurse
 import com.example.hospitalv1.nurses
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
+import com.example.hospitalv1.ui.remote.Nurse
 
 @Composable
 fun RegisterScreen(viewModel: AppViewModel) {
