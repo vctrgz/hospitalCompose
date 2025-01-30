@@ -17,6 +17,7 @@ import androidx.compose.ui.unit.sp
 import com.example.hospitalv1.AppViewModel
 import com.example.hospitalv1.R
 import com.example.hospitalv1.nurses
+import com.example.hospitalv1.ui.remote.RemoteNurseUiState
 
 
 @Composable
@@ -24,8 +25,9 @@ fun LoginScreen(viewModel: AppViewModel) {
     var username by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var loginError by remember { mutableStateOf("") }
+    var loginSucceed by remember { mutableStateOf("") }
     var showPassword by remember { mutableStateOf(false) }
-
+    val remoteNurseUiState = viewModel.remoteNurseUiState
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -67,7 +69,7 @@ fun LoginScreen(viewModel: AppViewModel) {
         )
 
         // Password Input
-        TextField(
+        TextField(  
             value = password,
             onValueChange = { password = it },
             label = { Text(text = "Password") },
@@ -98,11 +100,11 @@ fun LoginScreen(viewModel: AppViewModel) {
         // Login Button
         Button(
             onClick = {
-                val nurse = nurses.find { it.name == username && it.password == password }
-                if (nurse != null) {
-                    viewModel.loginSuccess()
-                } else {
-                    loginError = "Invalid credentials. Please try again."
+                viewModel.postRemoteLogin(username, password)
+                when (remoteNurseUiState) {
+                    is RemoteNurseUiState.Cargant -> loginSucceed = "Login correct"
+                    is RemoteNurseUiState.Error -> loginError = "Invalid credentials. Please try again."
+                    is RemoteNurseUiState.Success-> viewModel.loginSuccess()
                 }
             },
             modifier = Modifier
