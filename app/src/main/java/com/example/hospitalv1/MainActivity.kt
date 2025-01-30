@@ -17,6 +17,9 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -30,6 +33,7 @@ import com.example.hospitalv1.ui.screens.SearchScreen
 import com.example.hospitalv1.ui.screens.NurseScreen
 import com.example.hospitalv1.ui.screens.LoginScreen
 import com.example.hospitalv1.ui.screens.RegisterScreen
+import com.example.hospitalv1.ui.screens.ProfileScreen
 import com.example.hospitalv1.ui.theme.HospitalV1Theme
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -42,13 +46,18 @@ class AppViewModel : ViewModel() {
     private val _currentScreen = MutableStateFlow(Screen())
     val currentScreen: StateFlow<Screen> get() = _currentScreen.asStateFlow()
 
+    var loggedInNurse: Nurse? by mutableStateOf(null)
+        private set
+
+
     // formatear pantalla de login a no login
     init {
         _currentScreen.value = Screen("Login", false)
     }
 
     // despues de login actualizar estado
-    fun loginSuccess() {
+    fun loginSuccess(nurse: Nurse) {
+        loggedInNurse = nurse
         _currentScreen.update { it.copy(screen = "Main", logged = true) }
     }
 
@@ -60,6 +69,11 @@ class AppViewModel : ViewModel() {
     // verificar si el usuario se ha registado
     fun isLogged(): Boolean {
         return _currentScreen.value.logged
+    }
+
+    fun logout() {
+        loggedInNurse = null
+        _currentScreen.update { it.copy(screen = "Login", logged = false) }
     }
 }
 
@@ -76,7 +90,7 @@ class MainActivity : ComponentActivity() {
     }
 }
 
-data class Nurse(val id: Int, val name: String, val password: String, val profilePictureUrl: String)
+data class Nurse(val id: Int, var name: String, var password: String, val profilePictureUrl: String)
 
 // modificar usuario de list a mutable para modificarlo
 val nurses = mutableListOf(
@@ -106,6 +120,7 @@ fun MyApp() {
             "Main" -> MainScreen(viewModel)
             "Nurses" -> NurseScreen(viewModel)
             "Search" -> SearchScreen(viewModel)
+            "Profile" -> ProfileScreen(viewModel)
         }
     }
 }
@@ -144,11 +159,23 @@ fun MainScreen(viewModel: AppViewModel) {
             onClick = { viewModel.updateScreen("Search") },
             modifier = Modifier
                 .fillMaxWidth(0.8f)
+                .padding(bottom = 16.dp)
                 .height(56.dp),
             colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary),
             shape = RoundedCornerShape(12.dp)
         ) {
             Text(text = "Search Nurse", fontSize = 18.sp, color = Color.White)
+        }
+
+        Button(
+            onClick = { viewModel.updateScreen("Profile") },
+            modifier = Modifier
+                .fillMaxWidth(0.8f)
+                .height(56.dp),
+            colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary),
+            shape = RoundedCornerShape(12.dp)
+        ) {
+            Text(text = "Nurse Profile", fontSize = 18.sp, color = Color.White)
         }
     }
 }

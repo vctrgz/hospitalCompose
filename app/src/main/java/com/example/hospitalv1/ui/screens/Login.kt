@@ -100,7 +100,7 @@ fun LoginScreen(viewModel: AppViewModel) {
             onClick = {
                 val nurse = nurses.find { it.name == username && it.password == password }
                 if (nurse != null) {
-                    viewModel.loginSuccess()
+                    viewModel.loginSuccess(nurse)
                 } else {
                     loginError = "Invalid credentials. Please try again."
                 }
