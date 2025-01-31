@@ -13,11 +13,20 @@ sealed interface RemoteNurseUiState {
     object Error : RemoteNurseUiState
     object Cargant : RemoteNurseUiState
 }
+sealed interface RemoteRegisterUiState {
+    data class Success(val nurse: Nurse) : RemoteRegisterUiState
+    object Error : RemoteRegisterUiState
+    object Cargant : RemoteRegisterUiState
+}
 
-interface RemoteLoginInterface {
+
+interface RemoteInterface {
 
     @POST("/nurse/login")
     suspend fun postRemoteLogin(@Body nurse: Nurse): Nurse
+
+    @POST("/nurse/create")
+    suspend fun postRemoteRegister(@Body nurse: Nurse): Nurse
 
     @GET("/nurse/id/1")
     suspend fun getRemoteFindById(): Nurse

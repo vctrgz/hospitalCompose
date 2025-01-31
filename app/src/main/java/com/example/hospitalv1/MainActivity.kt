@@ -30,7 +30,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.example.hospitalv1.ui.remote.Nurse
-import com.example.hospitalv1.ui.remote.RemoteLoginInterface
+import com.example.hospitalv1.ui.remote.RemoteInterface
 import com.example.hospitalv1.ui.remote.RemoteNurseUiState
 import com.example.hospitalv1.ui.screens.SearchScreen
 import com.example.hospitalv1.ui.screens.NurseScreen
@@ -48,11 +48,13 @@ import retrofit2.create
 import retrofit2.http.GET
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
+import com.example.hospitalv1.ui.remote.RemoteRegisterUiState
 
 data class Screen(val screen: String = "", val logged: Boolean = false)
 
 class AppViewModel : ViewModel() {
     var remoteNurseUiState: RemoteNurseUiState by mutableStateOf(RemoteNurseUiState.Cargant)
+    var remoteRegisterUiState: RemoteRegisterUiState by mutableStateOf(RemoteRegisterUiState.Cargant)
     private set
     private val _currentScreen = MutableStateFlow(Screen())
     val currentScreen: StateFlow<Screen> get() = _currentScreen.asStateFlow()
@@ -66,6 +68,9 @@ class AppViewModel : ViewModel() {
     fun loginSuccess() {
         _currentScreen.update { it.copy(screen = "Main", logged = true) }
     }
+    fun registerSuccess() {
+        _currentScreen.update { it.copy(screen = "Login") }
+    }
     fun postRemoteLogin(name: String, password: String) {
         viewModelScope.launch{
             remoteNurseUiState=RemoteNurseUiState.Cargant
@@ -74,14 +79,31 @@ class AppViewModel : ViewModel() {
                     .baseUrl("http://10.0.2.2:8080")
                     .addConverterFactory(GsonConverterFactory.create())
                     .build()
-                val endPoint= connection.create(RemoteLoginInterface::class.java)
+                val endPoint= connection.create(RemoteInterface::class.java)
                 val answer = endPoint.postRemoteLogin(Nurse( name = name, password = password))
-                //val answer = endPoint.getRemoteFindById()
                 Log.d("Login", "RESPUESTA ${answer}")
                 remoteNurseUiState= RemoteNurseUiState.Success(answer)
             }catch (e: Exception){
                 Log.d("Login", "RESPUESTA ERROR ${e.message}${e.printStackTrace()}")
                 remoteNurseUiState = RemoteNurseUiState.Error
+            }
+        }
+    }
+    fun postRemoteRegister(name: String, password: String) {
+        viewModelScope.launch{
+            remoteRegisterUiState=RemoteRegisterUiState.Cargant
+            try {
+                val connection = Retrofit.Builder()
+                    .baseUrl("http://10.0.2.2:8080")
+                    .addConverterFactory(GsonConverterFactory.create())
+                    .build()
+                val endPoint= connection.create(RemoteInterface::class.java)
+                val answer = endPoint.postRemoteRegister(Nurse( name = name, password = password))
+                Log.d("Register", "RESPUESTA ${answer}")
+                remoteRegisterUiState= RemoteRegisterUiState.Success(answer)
+            }catch (e: Exception){
+                Log.d("Register", "RESPUESTA ERROR ${e.message}${e.printStackTrace()}")
+                remoteRegisterUiState = RemoteRegisterUiState.Error
             }
         }
     }
