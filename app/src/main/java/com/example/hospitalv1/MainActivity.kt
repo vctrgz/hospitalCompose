@@ -48,14 +48,23 @@ import retrofit2.create
 import retrofit2.http.GET
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
+import com.example.hospitalv1.ui.remote.RemoteNurseListState
 import com.example.hospitalv1.ui.remote.RemoteRegisterUiState
+
 
 data class Screen(val screen: String = "", val logged: Boolean = false)
 
 class AppViewModel : ViewModel() {
     var remoteNurseUiState: RemoteNurseUiState by mutableStateOf(RemoteNurseUiState.Cargant)
     var remoteRegisterUiState: RemoteRegisterUiState by mutableStateOf(RemoteRegisterUiState.Cargant)
-    private set
+        private set
+    var remoteNurseListState: RemoteNurseListState by mutableStateOf(RemoteNurseListState.Cargant)
+        private set
+    val connection = Retrofit.Builder()
+        .baseUrl("http://10.0.2.2:8080/")
+        .addConverterFactory(GsonConverterFactory.create())
+        .build()
+        .create(RemoteInterface::class.java)
     private val _currentScreen = MutableStateFlow(Screen())
     val currentScreen: StateFlow<Screen> get() = _currentScreen.asStateFlow()
 
@@ -107,6 +116,21 @@ class AppViewModel : ViewModel() {
             }
         }
     }
+
+    fun fetchAllNurses() {
+        viewModelScope.launch {
+            remoteNurseListState = RemoteNurseListState.Cargant
+            try {
+                val nurses = connection.getAllNurses()
+                Log.d("Nurses", "Fetched nurses: $nurses")
+                remoteNurseListState = RemoteNurseListState.Success(nurses)
+            } catch (e: Exception) {
+                Log.e("Nurses", "Error fetching nurses: ${e.message}")
+                remoteNurseListState = RemoteNurseListState.Error
+            }
+        }
+    }
+    
 
     // actualizar pantalla
     fun updateScreen(newScreen: String) {
