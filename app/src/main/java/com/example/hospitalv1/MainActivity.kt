@@ -133,7 +133,7 @@ class AppViewModel : ViewModel() {
         viewModelScope.launch {
             remoteNurseListState = RemoteNurseListState.Cargant
             try {
-                val nurses = connection.getAllNurses()
+                val nurses = connection.getRemoteAllNurses()
                 Log.d("Nurses", "Fetched nurses: $nurses")
                 remoteNurseListState = RemoteNurseListState.Success(nurses)
             } catch (e: Exception) {
