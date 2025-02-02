@@ -18,7 +18,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -47,15 +46,18 @@ import retrofit2.converter.gson.GsonConverterFactory
 import retrofit2.create
 import retrofit2.http.GET
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 
 data class Screen(val screen: String = "", val logged: Boolean = false)
 
 class AppViewModel : ViewModel() {
     var remoteNurseUiState: RemoteNurseUiState by mutableStateOf(RemoteNurseUiState.Cargant)
-    private set
+        private set
     private val _currentScreen = MutableStateFlow(Screen())
     val currentScreen: StateFlow<Screen> get() = _currentScreen.asStateFlow()
+    private val _loggedInNurse = MutableStateFlow<Nurse?>(null)
+    val loggedInNurse: StateFlow<Nurse?> get() = _loggedInNurse.asStateFlow()
 
     // formatear pantalla de login a no login
     init {
@@ -66,6 +68,7 @@ class AppViewModel : ViewModel() {
     fun loginSuccess() {
         _currentScreen.update { it.copy(screen = "Main", logged = true) }
     }
+
     fun postRemoteLogin(name: String, password: String) {
         viewModelScope.launch{
             remoteNurseUiState=RemoteNurseUiState.Cargant
@@ -86,6 +89,51 @@ class AppViewModel : ViewModel() {
         }
     }
 
+    fun updateNurseInfo(id: Int, name: String, password: String, callback: (Boolean) -> Unit) {
+        viewModelScope.launch {
+            try {
+                val connection = Retrofit.Builder()
+                    .baseUrl("http://10.0.2.2:8080")
+                    .addConverterFactory(GsonConverterFactory.create())
+                    .build()
+                val endPoint = connection.create(RemoteLoginInterface::class.java)
+                val nurse = Nurse(id = id, name = name, password = password)
+                val response = endPoint.updateNurse(id, nurse)
+
+                if (response.isSuccessful) {
+                    _loggedInNurse.update { nurse } // Actualiza el enfermero en el estado
+                    callback(true)
+                } else {
+                    callback(false)
+                }
+            } catch (e: Exception) {
+                callback(false)
+            }
+        }
+    }
+
+    fun deleteNurse(id: Int, callback: (Boolean) -> Unit) {
+        viewModelScope.launch {
+            try {
+                val connection = Retrofit.Builder()
+                    .baseUrl("http://10.0.2.2:8080")
+                    .addConverterFactory(GsonConverterFactory.create())
+                    .build()
+                val endPoint = connection.create(RemoteLoginInterface::class.java)
+                val response = endPoint.deleteNurse(id)
+
+                if (response.isSuccessful) {
+                    callback(true)
+                } else {
+                    callback(false)
+                }
+            } catch (e: Exception) {
+                callback(false)
+            }
+        }
+    }
+
+
     // actualizar pantalla
     fun updateScreen(newScreen: String) {
         _currentScreen.update { it.copy(screen = newScreen) }
@@ -95,10 +143,13 @@ class AppViewModel : ViewModel() {
     fun isLogged(): Boolean {
         return _currentScreen.value.logged
     }
+
+    fun logout() {
+        _loggedInNurse.update { null }  // Elimina el enfermero logueado
+        _currentScreen.update { it.copy(screen = "Login", logged = false) }
+    }
+
 }
-
-
-
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -111,7 +162,6 @@ class MainActivity : ComponentActivity() {
         }
     }
 }
-
 
 // modificar usuario de list a mutable para modificarlo
 val nurses = mutableListOf(
@@ -144,8 +194,6 @@ fun MyApp() {
         }
     }
 }
-
-
 
 @Composable
 fun MainScreen(viewModel: AppViewModel) {
@@ -185,11 +233,19 @@ fun MainScreen(viewModel: AppViewModel) {
         ) {
             Text(text = "Search Nurse", fontSize = 18.sp, color = Color.White)
         }
+
+        Button(
+            onClick = { viewModel.updateScreen("Profile") },
+            modifier = Modifier
+                .fillMaxWidth(0.8f)
+                .height(56.dp),
+            colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary),
+            shape = RoundedCornerShape(12.dp)
+        ) {
+            Text(text = "Nurse Profile", fontSize = 18.sp, color = Color.White)
+        }
     }
 }
-
-
-
 
 @Composable
 fun ElementColumn(text:String){
