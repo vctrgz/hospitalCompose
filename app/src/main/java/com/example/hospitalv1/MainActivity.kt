@@ -48,16 +48,27 @@ import retrofit2.create
 import retrofit2.http.GET
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
+import com.example.hospitalv1.ui.remote.RemoteNurseListState
 import com.example.hospitalv1.ui.remote.RemoteRegisterUiState
 import com.example.hospitalv1.ui.remote.RemoteSearchUiState
+
 
 data class Screen(val screen: String = "", val logged: Boolean = false)
 
 class AppViewModel : ViewModel() {
     var remoteNurseUiState: RemoteNurseUiState by mutableStateOf(RemoteNurseUiState.Cargant)
+        private set
     var remoteRegisterUiState: RemoteRegisterUiState by mutableStateOf(RemoteRegisterUiState.Cargant)
+        private set
     var remoteSearchUiState: RemoteSearchUiState by mutableStateOf(RemoteSearchUiState.Cargant)
-    private set
+        private set
+    var remoteNurseListState: RemoteNurseListState by mutableStateOf(RemoteNurseListState.Cargant)
+        private set
+    val connection = Retrofit.Builder()
+        .baseUrl("http://10.0.2.2:8080/")
+        .addConverterFactory(GsonConverterFactory.create())
+        .build()
+        .create(RemoteInterface::class.java)
     private val _currentScreen = MutableStateFlow(Screen())
     val currentScreen: StateFlow<Screen> get() = _currentScreen.asStateFlow()
 
@@ -77,12 +88,7 @@ class AppViewModel : ViewModel() {
         viewModelScope.launch{
             remoteNurseUiState=RemoteNurseUiState.Cargant
             try {
-                val connection = Retrofit.Builder()
-                    .baseUrl("http://10.0.2.2:8080")
-                    .addConverterFactory(GsonConverterFactory.create())
-                    .build()
-                val endPoint= connection.create(RemoteInterface::class.java)
-                val answer = endPoint.postRemoteLogin(Nurse( name = name, password = password))
+                val answer = connection.postRemoteLogin(Nurse( name = name, password = password))
                 Log.d("Login", "RESPUESTA ${answer}")
                 remoteNurseUiState= RemoteNurseUiState.Success(answer)
             }catch (e: Exception){
@@ -95,12 +101,7 @@ class AppViewModel : ViewModel() {
         viewModelScope.launch{
             remoteRegisterUiState=RemoteRegisterUiState.Cargant
             try {
-                val connection = Retrofit.Builder()
-                    .baseUrl("http://10.0.2.2:8080")
-                    .addConverterFactory(GsonConverterFactory.create())
-                    .build()
-                val endPoint= connection.create(RemoteInterface::class.java)
-                val answer = endPoint.postRemoteRegister(Nurse( name = name, password = password))
+                val answer = connection.postRemoteRegister(Nurse( name = name, password = password))
                 Log.d("Register", "RESPUESTA ${answer}")
                 remoteRegisterUiState= RemoteRegisterUiState.Success(answer)
             }catch (e: Exception){
@@ -113,12 +114,7 @@ class AppViewModel : ViewModel() {
         viewModelScope.launch{
             remoteSearchUiState=RemoteSearchUiState.Cargant
             try {
-                val connection = Retrofit.Builder()
-                    .baseUrl("http://10.0.2.2:8080")
-                    .addConverterFactory(GsonConverterFactory.create())
-                    .build()
-                val endPoint= connection.create(RemoteInterface::class.java)
-                val answer = endPoint.getRemoteNurseList()
+                val answer = connection.getRemoteAllNurses()
                 Log.d("Search", "RESPUESTA ${answer}")
                 val filteredList = if (response.toIntOrNull() != null) {
                     answer.filter { it.id.toString() == response } // Filtrar por ID
@@ -132,6 +128,21 @@ class AppViewModel : ViewModel() {
             }
         }
     }
+
+    fun fetchAllNurses() {
+        viewModelScope.launch {
+            remoteNurseListState = RemoteNurseListState.Cargant
+            try {
+                val nurses = connection.getAllNurses()
+                Log.d("Nurses", "Fetched nurses: $nurses")
+                remoteNurseListState = RemoteNurseListState.Success(nurses)
+            } catch (e: Exception) {
+                Log.e("Nurses", "Error fetching nurses: ${e.message}")
+                remoteNurseListState = RemoteNurseListState.Error
+            }
+        }
+    }
+    
 
     // actualizar pantalla
     fun updateScreen(newScreen: String) {
