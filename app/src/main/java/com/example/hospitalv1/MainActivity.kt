@@ -49,12 +49,14 @@ import retrofit2.http.GET
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
 import com.example.hospitalv1.ui.remote.RemoteRegisterUiState
+import com.example.hospitalv1.ui.remote.RemoteSearchUiState
 
 data class Screen(val screen: String = "", val logged: Boolean = false)
 
 class AppViewModel : ViewModel() {
     var remoteNurseUiState: RemoteNurseUiState by mutableStateOf(RemoteNurseUiState.Cargant)
     var remoteRegisterUiState: RemoteRegisterUiState by mutableStateOf(RemoteRegisterUiState.Cargant)
+    var remoteSearchUiState: RemoteSearchUiState by mutableStateOf(RemoteSearchUiState.Cargant)
     private set
     private val _currentScreen = MutableStateFlow(Screen())
     val currentScreen: StateFlow<Screen> get() = _currentScreen.asStateFlow()
@@ -104,6 +106,29 @@ class AppViewModel : ViewModel() {
             }catch (e: Exception){
                 Log.d("Register", "RESPUESTA ERROR ${e.message}${e.printStackTrace()}")
                 remoteRegisterUiState = RemoteRegisterUiState.Error
+            }
+        }
+    }
+    fun getRemoteFindByNameAndId(response: String) {
+        viewModelScope.launch{
+            remoteSearchUiState=RemoteSearchUiState.Cargant
+            try {
+                val connection = Retrofit.Builder()
+                    .baseUrl("http://10.0.2.2:8080")
+                    .addConverterFactory(GsonConverterFactory.create())
+                    .build()
+                val endPoint= connection.create(RemoteInterface::class.java)
+                val answer = endPoint.getRemoteNurseList()
+                Log.d("Search", "RESPUESTA ${answer}")
+                val filteredList = if (response.toIntOrNull() != null) {
+                    answer.filter { it.id.toString() == response } // Filtrar por ID
+                } else {
+                    answer.filter { it.name.contains(response, ignoreCase = true) } // Filtrar por nombre
+                }
+                remoteSearchUiState= RemoteSearchUiState.Success(filteredList)
+            }catch (e: Exception){
+                Log.d("Search", "RESPUESTA ERROR ${e.message}${e.printStackTrace()}")
+                remoteSearchUiState = RemoteSearchUiState.Error
             }
         }
     }

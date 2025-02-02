@@ -18,6 +18,11 @@ sealed interface RemoteRegisterUiState {
     object Error : RemoteRegisterUiState
     object Cargant : RemoteRegisterUiState
 }
+sealed interface RemoteSearchUiState {
+    data class Success(val nurses: List<Nurse>) : RemoteSearchUiState
+    object Error : RemoteSearchUiState
+    object Cargant : RemoteSearchUiState
+}
 
 
 interface RemoteInterface {
@@ -28,6 +33,12 @@ interface RemoteInterface {
     @POST("/nurse/create")
     suspend fun postRemoteRegister(@Body nurse: Nurse): Nurse
 
-    @GET("/nurse/id/1")
+    @GET("/nurse/id/{id}")
     suspend fun getRemoteFindById(): Nurse
+
+    @GET("/nurse/name/{name}")
+    suspend fun getRemoteFindByName(): List<Nurse>
+
+    @GET("/nurse/nurses")
+    suspend fun getRemoteNurseList(): List<Nurse>
 }
