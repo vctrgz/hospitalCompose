@@ -14,22 +14,41 @@ import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import com.example.hospitalv1.AppViewModel
 import com.example.hospitalv1.nurses
+import com.example.hospitalv1.ui.remote.Nurse
+import com.example.hospitalv1.ui.remote.RemoteNurseUiState
+import com.example.hospitalv1.ui.remote.RemoteSearchUiState
 
 @Composable
 fun SearchScreen(viewModel: AppViewModel) {
+    val remoteSearchUiState = viewModel.remoteSearchUiState
+    var searchError by remember { mutableStateOf("") }
+    var searchSucceed by remember { mutableStateOf("") }
     var searchNurse by remember { mutableStateOf("") }
-    val filteredResults by remember(searchNurse) {
-        derivedStateOf {
-            if (searchNurse.isNotEmpty()) {
-                nurses.filter {
-                    it.name.contains(searchNurse, ignoreCase = true) || it.id.toString() == searchNurse
-                }
-            } else {
-                emptyList()
-            }
+    var filteredResults by remember { mutableStateOf(emptyList<Nurse>()) }
+//    val filteredResults by remember(searchNurse) {
+//        derivedStateOf {
+//            viewModel.getRemoteFindByNameAndId(searchNurse)
+//            when (remoteSearchUiState) {
+//                is RemoteSearchUiState.Cargant -> searchSucceed = "Login correct"
+//                is RemoteSearchUiState.Error -> searchError = "Invalid credentials. Please try again."
+//                is RemoteSearchUiState.Success-> viewModel.loginSuccess()
+//            }
+//        }
+//    }
+
+    // Llama a la búsqueda cuando el usuario escribe
+    LaunchedEffect(searchNurse) {
+        if (searchNurse.isNotEmpty()) {
+            viewModel.getRemoteFindByNameAndId(searchNurse)
         }
     }
 
+    // Actualiza los resultados cuando cambia el estado
+    LaunchedEffect(remoteSearchUiState) {
+        if (remoteSearchUiState is RemoteSearchUiState.Success) {
+            filteredResults = remoteSearchUiState.nurses
+        }
+    }
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -76,7 +95,7 @@ fun SearchScreen(viewModel: AppViewModel) {
                             ?: "https://www.example.com/default-image.png",
                         contentDescription = "Profile Picture of ${nurse.name}",
                         modifier = Modifier
-                            .size(50.dp)
+                            .size(40.dp)
                             .padding(end = 16.dp),
                         contentScale = ContentScale.Crop, // Recorta la imagen de forma cuadrada
                         onError = {},
