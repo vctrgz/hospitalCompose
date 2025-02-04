@@ -24,19 +24,44 @@ sealed interface RemoteProfileUiState {
     object Error : RemoteProfileUiState
     object Cargant : RemoteProfileUiState
 }
+sealed interface RemoteRegisterUiState {
+    data class Success(val nurse: Nurse) : RemoteRegisterUiState
+    object Error : RemoteRegisterUiState
+    object Cargant : RemoteRegisterUiState
+}
+sealed interface RemoteSearchUiState {
+    data class Success(val nurses: List<Nurse>) : RemoteSearchUiState
+    object Error : RemoteSearchUiState
+    object Cargant : RemoteSearchUiState
+}
+
+sealed interface RemoteNurseListState {
+    data class Success(val nurses: List<Nurse>) : RemoteNurseListState
+    object Error : RemoteNurseListState
+    object Cargant : RemoteNurseListState
+}
 
 
-interface RemoteLoginInterface {
+interface RemoteInterface {
 
     @POST("/nurse/login")
     suspend fun postRemoteLogin(@Body nurse: Nurse): Nurse
 
-    @GET("/nurse/id/1")
-    suspend fun getRemoteFindById(): Nurse
+    @POST("/nurse/create")
+    suspend fun postRemoteRegister(@Body nurse: Nurse): Nurse
 
+    @GET("/nurse/nurses")
+    suspend fun getRemoteAllNurses(): List<Nurse>
+
+    @GET("/nurse/id/{id}")
+    suspend fun getRemoteFindById(): Nurse
+  
     @POST("/nurse/update")
     suspend fun updateNurse(@Body nurse: Nurse, @Query("newName") name: String, @Query("newPassword") password: String): Response<Nurse>
 
     @DELETE("/nurse/delete/{id}")
     suspend fun deleteNurse(@Path("id") id: Int): Response<Unit>
+  
+    @GET("/nurse/name/{name}")
+    suspend fun getRemoteFindByName(): List<Nurse>
 }

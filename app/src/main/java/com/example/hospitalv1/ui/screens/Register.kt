@@ -16,13 +16,17 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
 import com.example.hospitalv1.ui.remote.Nurse
+import com.example.hospitalv1.ui.remote.RemoteNurseUiState
+import com.example.hospitalv1.ui.remote.RemoteRegisterUiState
 
 @Composable
 fun RegisterScreen(viewModel: AppViewModel) {
     var username by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
-    var registrationError by remember { mutableStateOf("") }
     var showPassword by remember { mutableStateOf(false) }
+    var registerError by remember { mutableStateOf("") }
+    var registerSucceed by remember { mutableStateOf("") }
+    val remoteRegisterUiState = viewModel.remoteRegisterUiState
 
     Column(
         modifier = Modifier
@@ -77,15 +81,21 @@ fun RegisterScreen(viewModel: AppViewModel) {
         Button(
             onClick = {
                 if (username.isNotBlank() && password.isNotBlank()) {
-                    if (nurses.any { it.name == username }) {
-                        registrationError = "Username already exists. Please try another."
-                    } else {
-                        val newNurse = Nurse(id = nurses.size + 1, name = username, password = password, profilePictureUrl = "https://static.nationalgeographicla.com/files/styles/image_3200/public/3897187267_f36b5e4e7a_c.webp?w=1600&h=1200")
-                        nurses.add(newNurse)
-                        viewModel.updateScreen("Login")
+//                    if (nurses.any { it.name == username }) {
+//                        registrationError = "Username already exists. Please try another."
+//                    } else {
+//                        val newNurse = Nurse(id = nurses.size + 1, name = username, password = password, profilePictureUrl = "https://static.nationalgeographicla.com/files/styles/image_3200/public/3897187267_f36b5e4e7a_c.webp?w=1600&h=1200")
+//                        nurses.add(newNurse)
+//                        viewModel.updateScreen("Login")
+//                    }
+                    viewModel.postRemoteRegister(username, password)
+                    when (remoteRegisterUiState) {
+                        is RemoteRegisterUiState.Cargant -> registerSucceed = "Register correct"
+                        is RemoteRegisterUiState.Error -> registerError = "This name already exists, please try another name."
+                        is RemoteRegisterUiState.Success-> viewModel.registerSuccess()
                     }
                 } else {
-                    registrationError = "Please fill in both fields."
+                    registerError = "Please fill in both fields."
                 }
             },
             colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary),
@@ -103,9 +113,9 @@ fun RegisterScreen(viewModel: AppViewModel) {
             Text(text = "Back to Login", color = MaterialTheme.colorScheme.primary)
         }
 
-        if (registrationError.isNotEmpty()) {
+        if (registerError.isNotEmpty()) {
             Text(
-                text = registrationError,
+                text = registerError,
                 color = MaterialTheme.colorScheme.error,
                 modifier = Modifier.padding(top = 16.dp),
                 style = MaterialTheme.typography.bodyLarge
