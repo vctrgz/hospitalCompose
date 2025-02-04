@@ -18,7 +18,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -47,7 +46,10 @@ import retrofit2.converter.gson.GsonConverterFactory
 import retrofit2.create
 import retrofit2.http.GET
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
+import com.example.hospitalv1.ui.remote.RemoteProfileUiState
+import com.example.hospitalv1.ui.screens.ProfileScreen
 import com.example.hospitalv1.ui.remote.RemoteNurseListState
 import com.example.hospitalv1.ui.remote.RemoteRegisterUiState
 import com.example.hospitalv1.ui.remote.RemoteSearchUiState
@@ -57,6 +59,8 @@ data class Screen(val screen: String = "", val logged: Boolean = false)
 
 class AppViewModel : ViewModel() {
     var remoteNurseUiState: RemoteNurseUiState by mutableStateOf(RemoteNurseUiState.Cargant)
+        private set
+    var remoteProfileUiState: RemoteProfileUiState by mutableStateOf(RemoteProfileUiState.Cargant)
         private set
     var remoteRegisterUiState: RemoteRegisterUiState by mutableStateOf(RemoteRegisterUiState.Cargant)
         private set
@@ -71,6 +75,8 @@ class AppViewModel : ViewModel() {
         .create(RemoteInterface::class.java)
     private val _currentScreen = MutableStateFlow(Screen())
     val currentScreen: StateFlow<Screen> get() = _currentScreen.asStateFlow()
+    private val _loggedInNurse = MutableStateFlow<Nurse?>(null)
+    val loggedInNurse: StateFlow<Nurse?> get() = _loggedInNurse.asStateFlow()
 
     // formatear pantalla de login a no login
     init {
@@ -81,9 +87,11 @@ class AppViewModel : ViewModel() {
     fun loginSuccess() {
         _currentScreen.update { it.copy(screen = "Main", logged = true) }
     }
+    
     fun registerSuccess() {
         _currentScreen.update { it.copy(screen = "Login") }
     }
+    
     fun postRemoteLogin(name: String, password: String) {
         viewModelScope.launch{
             remoteNurseUiState=RemoteNurseUiState.Cargant
@@ -91,6 +99,7 @@ class AppViewModel : ViewModel() {
                 val answer = connection.postRemoteLogin(Nurse( name = name, password = password))
                 Log.d("Login", "RESPUESTA ${answer}")
                 remoteNurseUiState= RemoteNurseUiState.Success(answer)
+                _loggedInNurse.update { answer }
             }catch (e: Exception){
                 Log.d("Login", "RESPUESTA ERROR ${e.message}${e.printStackTrace()}")
                 remoteNurseUiState = RemoteNurseUiState.Error
@@ -144,6 +153,39 @@ class AppViewModel : ViewModel() {
     }
     
 
+    fun updateNurseInfo(id: Int, name: String, password: String) {
+        viewModelScope.launch {
+            remoteProfileUiState=RemoteProfileUiState.Cargant
+            try {
+                val nurse = Nurse(id = id, name = name, password = password)
+                val response = connection.updateNurse(nurse, name = name, password = password)
+                _loggedInNurse.update { nurse } // Actualiza el enfermero en el estado
+                Log.d("Update", "RESPUESTA ${response}")
+                remoteProfileUiState=RemoteProfileUiState.Success(nurse)
+            } catch (e: Exception) {
+                Log.d("Update", "RESPUESTA ERROR ${e.message}${e.printStackTrace()}")
+                remoteProfileUiState=RemoteProfileUiState.Error
+            }
+        }
+    }
+
+    fun deleteNurse(id: Int, callback: (Boolean) -> Unit) {
+        viewModelScope.launch {
+            try {
+                val response = connection.deleteNurse(id)
+
+                if (response.isSuccessful) {
+                    callback(true)
+                } else {
+                    callback(false)
+                }
+            } catch (e: Exception) {
+                callback(false)
+            }
+        }
+    }
+
+
     // actualizar pantalla
     fun updateScreen(newScreen: String) {
         _currentScreen.update { it.copy(screen = newScreen) }
@@ -153,10 +195,13 @@ class AppViewModel : ViewModel() {
     fun isLogged(): Boolean {
         return _currentScreen.value.logged
     }
+
+    fun logout() {
+        _loggedInNurse.update { null }  // Elimina el enfermero logueado
+        _currentScreen.update { it.copy(screen = "Login", logged = false) }
+    }
+
 }
-
-
-
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -169,7 +214,6 @@ class MainActivity : ComponentActivity() {
         }
     }
 }
-
 
 // modificar usuario de list a mutable para modificarlo
 val nurses = mutableListOf(
@@ -199,11 +243,10 @@ fun MyApp() {
             "Main" -> MainScreen(viewModel)
             "Nurses" -> NurseScreen(viewModel)
             "Search" -> SearchScreen(viewModel)
+            "Profile" -> ProfileScreen(viewModel)
         }
     }
 }
-
-
 
 @Composable
 fun MainScreen(viewModel: AppViewModel) {
@@ -243,11 +286,19 @@ fun MainScreen(viewModel: AppViewModel) {
         ) {
             Text(text = "Search Nurse", fontSize = 18.sp, color = Color.White)
         }
+
+        Button(
+            onClick = { viewModel.updateScreen("Profile") },
+            modifier = Modifier
+                .fillMaxWidth(0.8f)
+                .height(56.dp),
+            colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary),
+            shape = RoundedCornerShape(12.dp)
+        ) {
+            Text(text = "Nurse Profile", fontSize = 18.sp, color = Color.White)
+        }
     }
 }
-
-
-
 
 @Composable
 fun ElementColumn(text:String){
