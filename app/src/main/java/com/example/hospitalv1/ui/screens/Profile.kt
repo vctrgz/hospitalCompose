@@ -14,14 +14,18 @@ import coil.compose.AsyncImage
 import com.example.hospitalv1.AppViewModel
 import com.example.hospitalv1.nurses
 import com.example.hospitalv1.ui.remote.Nurse
+import com.example.hospitalv1.ui.remote.RemoteNurseUiState
+import com.example.hospitalv1.ui.remote.RemoteProfileUiState
 
 
 @Composable
 fun ProfileScreen(viewModel: AppViewModel) {
+    val remoteProfileUiState = viewModel.remoteProfileUiState
     val currentNurse = viewModel.loggedInNurse.collectAsState().value
     var name by remember { mutableStateOf(currentNurse?.name ?: "") }
     var password by remember { mutableStateOf(currentNurse?.password ?: "") }
     var updateSuccess by remember { mutableStateOf("") }
+    var updateLogin by remember { mutableStateOf("") }
     var errorMessage by remember { mutableStateOf("") }
 
     // Si el enfermero no está logueado, redirigimos a la pantalla de login
@@ -29,6 +33,7 @@ fun ProfileScreen(viewModel: AppViewModel) {
         viewModel.updateScreen("Login")
         return
     }
+
 
     Column(
         modifier = Modifier
@@ -48,6 +53,7 @@ fun ProfileScreen(viewModel: AppViewModel) {
             contentScale = ContentScale.Crop
         )
 
+
         Spacer(modifier = Modifier.height(16.dp))
 
         // Campo de texto para modificar el nombre
@@ -57,6 +63,16 @@ fun ProfileScreen(viewModel: AppViewModel) {
             label = { Text("Name") },
             modifier = Modifier.fillMaxWidth(0.9f)
         )
+
+        Spacer(modifier = Modifier.height(8.dp))
+
+        // Campo de texto para modificar el nombre
+//        TextField(
+//            value = username,
+//            onValueChange = { username = it },
+//            label = { Text("Username") },
+//            modifier = Modifier.fillMaxWidth(0.9f)
+//        )
 
         Spacer(modifier = Modifier.height(8.dp))
 
@@ -73,15 +89,26 @@ fun ProfileScreen(viewModel: AppViewModel) {
         // Botón para actualizar la información
         Button(
             onClick = {
+//                if (name.isNotEmpty() && password.isNotEmpty()) {
+//                    viewModel.updateNurseInfo(currentNurse.id, name, password) { result ->
+//                        if (result) {
+//                            updateSuccess = "Profile updated successfully"
+//                            errorMessage = ""
+//                        } else {
+//                            updateSuccess = ""
+//                            errorMessage = "Failed to update profile"
+//                        }
+//                    }
+//                } else {
+//                    errorMessage = "Please fill out both fields"
+//                    updateSuccess = ""
+//                }
                 if (name.isNotEmpty() && password.isNotEmpty()) {
-                    viewModel.updateNurseInfo(currentNurse.id, name, password) { result ->
-                        if (result) {
-                            updateSuccess = "Profile updated successfully"
-                            errorMessage = ""
-                        } else {
-                            updateSuccess = ""
-                            errorMessage = "Failed to update profile"
-                        }
+                    viewModel.updateNurseInfo(currentNurse.id, name, password)
+                    when (remoteProfileUiState) {
+                        is RemoteProfileUiState.Cargant -> updateLogin = "Cargando"
+                        is RemoteProfileUiState.Error -> errorMessage = "Error updating nurse. Please try again."
+                        is RemoteProfileUiState.Success-> updateSuccess = "Update correct"
                     }
                 } else {
                     errorMessage = "Please fill out both fields"

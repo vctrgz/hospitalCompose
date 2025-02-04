@@ -48,11 +48,15 @@ import retrofit2.http.GET
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
+import com.example.hospitalv1.ui.remote.RemoteProfileUiState
+import com.example.hospitalv1.ui.screens.ProfileScreen
 
 data class Screen(val screen: String = "", val logged: Boolean = false)
 
 class AppViewModel : ViewModel() {
     var remoteNurseUiState: RemoteNurseUiState by mutableStateOf(RemoteNurseUiState.Cargant)
+        private set
+    var remoteProfileUiState: RemoteProfileUiState by mutableStateOf(RemoteProfileUiState.Cargant)
         private set
     private val _currentScreen = MutableStateFlow(Screen())
     val currentScreen: StateFlow<Screen> get() = _currentScreen.asStateFlow()
@@ -82,6 +86,7 @@ class AppViewModel : ViewModel() {
                 //val answer = endPoint.getRemoteFindById()
                 Log.d("Login", "RESPUESTA ${answer}")
                 remoteNurseUiState= RemoteNurseUiState.Success(answer)
+                _loggedInNurse.update { answer }
             }catch (e: Exception){
                 Log.d("Login", "RESPUESTA ERROR ${e.message}${e.printStackTrace()}")
                 remoteNurseUiState = RemoteNurseUiState.Error
@@ -89,25 +94,31 @@ class AppViewModel : ViewModel() {
         }
     }
 
-    fun updateNurseInfo(id: Int, name: String, password: String, callback: (Boolean) -> Unit) {
+    fun updateNurseInfo(id: Int, name: String, password: String) {
         viewModelScope.launch {
+            remoteProfileUiState=RemoteProfileUiState.Cargant
             try {
+                val nurse = Nurse(id = id, name = name, password = password)
                 val connection = Retrofit.Builder()
                     .baseUrl("http://10.0.2.2:8080")
                     .addConverterFactory(GsonConverterFactory.create())
                     .build()
                 val endPoint = connection.create(RemoteLoginInterface::class.java)
-                val nurse = Nurse(id = id, name = name, password = password)
-                val response = endPoint.updateNurse(id, nurse)
-
-                if (response.isSuccessful) {
+                val response = endPoint.updateNurse(nurse, name = name, password = password)
+                //if (response.isSuccessful) {
                     _loggedInNurse.update { nurse } // Actualiza el enfermero en el estado
-                    callback(true)
-                } else {
-                    callback(false)
-                }
+                    Log.d("Update", "RESPUESTA ${response}")
+                    remoteProfileUiState=RemoteProfileUiState.Success(nurse)
+                    //callback(true)
+                //} else {
+                    //callback(false)
+//                    Log.d("Update", "RESPUESTA ERROR 1 ${response}")
+//                    remoteProfileUiState=RemoteProfileUiState.Error
+               // }
             } catch (e: Exception) {
-                callback(false)
+                //callback(false)
+                Log.d("Update", "RESPUESTA ERROR 2 ${e.message}${e.printStackTrace()}")
+                remoteProfileUiState=RemoteProfileUiState.Error
             }
         }
     }
@@ -191,6 +202,7 @@ fun MyApp() {
             "Main" -> MainScreen(viewModel)
             "Nurses" -> NurseScreen(viewModel)
             "Search" -> SearchScreen(viewModel)
+            "Profile" -> ProfileScreen(viewModel)
         }
     }
 }
